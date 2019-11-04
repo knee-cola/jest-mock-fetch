@@ -6,7 +6,6 @@ Because it works synchronously, meaning that your tests will be easier to write,
 
 # What's in this document?
 * [Installation](#installation)
-  * [Why do we need to manually create the mock?](#why-do-we-need-to-manually-create-the-mock)
 * [Basic example](#basic-example)
 * [fetch mock API](#fetch-mock-api)
   * [fetch.mockResponse](#fetchmockresponseresponse-requestinfo-silentmode)
