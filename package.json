@@ -1,0 +1,49 @@
+{
+  "name": "jest-mock-fetch",
+  "version": "1.0.0",
+  "description": "Synchronous `fetch` mock for Jest",
+  "main": "dist/index.js",
+  "types": "dist/lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf ./dist",
+    "lint": "tslint -c tslint.json 'lib/**/*.ts'",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "build:js": "babel lib --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
+    "deploy2npm": "npm run build && npm publish",
+    "test": "jest --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knee-cola/jest-mock-fetch.git"
+  },
+  "keywords": [
+    "fetch",
+    "jest",
+    "mock"
+  ],
+  "author": "knee-cola <nikola.derezic@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knee-cola/jest-mock-fetch/issues"
+  },
+  "homepage": "https://github.com/knee-cola/jest-mock-fetch#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-typescript": "^7.6.0",
+    "@types/jest": "^24.0.20",
+    "babel-loader": "^8.0.6",
+    "jest": "^24.9.0",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "jest-mock-promise": "^1.1.2"
+  }
+}
