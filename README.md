@@ -17,7 +17,7 @@ Because it works synchronously, meaning that your tests will be easier to write,
 * [Additional examples](#additional-examples)
   * [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
   * [Resolving requests out of order](#resolving-requests-out-of-order)
-* [Missing features](#missing-features)
+* [Mocking polyfill/ponyfill libraries](#mocking-polyfill/ponyfill-libraries)
 * [Synchronous promise](#synchronous-promise)
 
 # Installation
@@ -282,7 +282,7 @@ Although this might not be the most realistic use-case of this functionality, it
 
 **NOTE:** the identical effect can be achieved by using the [`lastPromiseGet`](#fetchlastpromiseget) method. These two methods perform a similar task, as described in the corresponding documentation.
 
-# Mocking `fetch` polyfill/ponyfill libraries
+# Mocking polyfill/ponyfill libraries
 Polyfill/ponyfill libraries which implement `fetch` API can also be mocked. Here's an example for [unfetch](https://www.npmjs.com/package/unfetch).
 
 To mock `unfetch` we need to setup a [manual Jest mock](https://facebook.github.io/jest/docs/en/manual-mocks.html):
