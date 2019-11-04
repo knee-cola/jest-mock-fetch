@@ -17,7 +17,5 @@
     ],
     "include": [
        "lib/*.ts",
-       "test",
-       "__mocks__"
     ]
 }
