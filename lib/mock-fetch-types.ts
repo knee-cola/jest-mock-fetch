@@ -1,4 +1,3 @@
-import Global = NodeJS.Global;
 import MockPromise from "jest-mock-promise";
 
 declare global {
@@ -10,7 +9,7 @@ declare global {
     }
 }
 
-export interface GlobalWithFetchMockType extends Global {
+export interface GlobalWithMockFetch extends NodeJS.Global {
     mockFetch: FetchMockType;
     fetch: FetchMockType;
 }
