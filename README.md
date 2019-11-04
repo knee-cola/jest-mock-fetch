@@ -6,6 +6,8 @@ Because it works synchronously, meaning that your tests will be easier to write,
 
 # What's in this document?
 * [Installation](#installation)
+  * [Setup](#setup)
+  * [Mocking polyfill/ponyfill libraries](#setup-for-polyfill/ponyfill-libraries)
 * [Basic example](#basic-example)
 * [fetch mock API](#fetch-mock-api)
   * [fetch.mockResponse](#fetchmockresponseresponse-requestinfo-silentmode)
@@ -16,13 +18,44 @@ Because it works synchronously, meaning that your tests will be easier to write,
 * [Additional examples](#additional-examples)
   * [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
   * [Resolving requests out of order](#resolving-requests-out-of-order)
-* [Mocking polyfill/ponyfill libraries](#mocking-polyfill/ponyfill-libraries)
 * [Synchronous promise](#synchronous-promise)
 
 # Installation
 Installation is simple - just run:
 
     npm i --save-dev jest-mock-fetch
+
+## Setup
+Create a `setupJest.js` file to setup the mock with the folloging content:
+```javascript
+// setupJest.js
+global.fetch = require('jest-mock-fetch');
+```
+
+Edit the `jest.config.js` file and add the following:
+```javascript
+"jest": {
+  "automock": false,
+  "setupFiles": [
+    "./setupJest.js"
+  ]
+}
+```
+
+## Setup for polyfill/ponyfill libraries
+If you are using a polyfill/ponyfill library (i.e. [unfetch](https://www.npmjs.com/package/unfetch)) which implement `fetch` API then you need to use a different setup procedure.
+
+Here's an example for [unfetch](https://www.npmjs.com/package/unfetch):
+
+* We need to setup a [manual Jest mock](https://facebook.github.io/jest/docs/en/manual-mocks.html)
+  * create `__mocks__` directory in your project root
+  * inside this new directory create a files named `unfetch.js`
+  * copy & past the following snippets to `unfetch.js` file
+    ```javascript
+    // ./__mocks__/unfetch.js
+    import unfetch from 'jest-mock-fetch';
+    export default unfetch;
+    ```
 
 # Basic example
 Let's consider that we want to test a component which uses Unfetch. This component returns a promise, which will be resolved after Unfetch is done communicating with the server.
@@ -280,24 +313,6 @@ it('when resolving a request an appropriate handler should be called', () => {
 Although this might not be the most realistic use-case of this functionality, it does illustrate how `lastReqGet` method can be used to alter the default behaviour of the `mockResponse` method.
 
 **NOTE:** the identical effect can be achieved by using the [`lastPromiseGet`](#fetchlastpromiseget) method. These two methods perform a similar task, as described in the corresponding documentation.
-
-# Mocking polyfill/ponyfill libraries
-Polyfill/ponyfill libraries which implement `fetch` API can also be mocked. Here's an example for [unfetch](https://www.npmjs.com/package/unfetch).
-
-To mock `unfetch` we need to setup a [manual Jest mock](https://facebook.github.io/jest/docs/en/manual-mocks.html):
-* create `__mocks__` directory in your project root
-* inside this new directory create a files named `unfetch.js`
-* copy & past the following snippets to `unfetch.js` file
-
-```javascript
-// ./__mocks__/unfetch.js
-import unfetch from 'jest-mock-fetch';
-export default unfetch;
-```
-
-## Why do we need to manually create the mock?
-It's because Jest expects mocks to be placed in the project root, while
-packages installed via NPM get stored inside `node_modules` subdirectory.
 
 # Synchronous promise
 The magic which enables fetch mock to work synchronously is hidden away in [`jest-mock-promise`](https://www.npmjs.com/package/jest-mock-promise), which enables promises to be settled in synchronous manner.
