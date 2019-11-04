@@ -7,7 +7,7 @@ Because it works synchronously, meaning that your tests will be easier to write,
 # What's in this document?
 * [Installation](#installation)
   * [Setup](#setup)
-  * [Mocking polyfill/ponyfill libraries](#setup-for-polyfill/ponyfill-libraries)
+  * [Setup for polyfill/ponyfill libraries](#setup-for-polyfill/ponyfill-libraries)
 * [Basic example](#basic-example)
 * [fetch mock API](#fetch-mock-api)
   * [fetch.mockResponse](#fetchmockresponseresponse-requestinfo-silentmode)
