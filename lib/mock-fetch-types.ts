@@ -1,6 +1,5 @@
 import Global = NodeJS.Global;
 import MockPromise from "jest-mock-promise";
-import "jest";
 
 declare global {
     const fetchMock: FetchMockType;
