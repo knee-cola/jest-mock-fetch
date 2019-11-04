@@ -1,4 +1,4 @@
-import MockPromise from 'jest-mock-promise';
+import MockPromise from "jest-mock-promise";
 
 export interface HttpResponse {
     data: any;

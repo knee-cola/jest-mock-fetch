@@ -5,7 +5,7 @@
  * @license  @license MIT License, http://www.opensource.org/licenses/MIT
  */
 
-import MockPromise from 'jest-mock-promise';
+import MockPromise from "jest-mock-promise";
 
 import {
     FetchMockQueueItem,
@@ -16,7 +16,7 @@ import {
 /** a FIFO queue of pending request */
 const _pending_requests: FetchMockQueueItem[] = [];
 
-const _newReq: (url:string, data?: any, config?: any) => MockPromise = (url:string, data?: any, config?: any) => {
+const _newReq: (url: string, data?: any, config?: any) => MockPromise = (url: string, data?: any, config?: any) => {
 
     const promise: MockPromise = new MockPromise();
 
