@@ -1,4 +1,20 @@
+import Global = NodeJS.Global;
 import MockPromise from "jest-mock-promise";
+import "jest";
+
+declare global {
+    const fetchMock: FetchMockType;
+    namespace NodeJS {
+        interface Global {
+            fetch: FetchMockType;
+        }
+    }
+}
+
+export interface GlobalWithFetchMockType extends Global {
+    mockFetch: FetchMockType;
+    fetch: FetchMockType;
+}
 
 export interface HttpResponse {
     data: any;
