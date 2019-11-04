@@ -26,7 +26,7 @@ it("UppercaseProxy should get data from the server and convert it to UPPERCASE",
     });
 
     // simulating a server response
-    const responseObj = { data: "server says hello!" };
+    const responseObj = { text: () => 'server says hello!' };
     mockFetch.mockResponse(responseObj);
 
     // catch should not have been called

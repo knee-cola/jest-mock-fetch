@@ -88,7 +88,7 @@ it('UppercaseProxy should get data from the server and convert it to UPPERCASE',
     expect(fetch).toHaveBeenCalledWith('/web-service-url/', {data: clientMessage });
 
     // simulating a server response
-    let responseObj = { data: 'server says hello!' };
+    let responseObj = { text: () => 'server says hello!' };
     fetch.mockResponse(responseObj);
 
     // checking the `then` spy has been called and if the
@@ -106,13 +106,15 @@ To make this example complete and easier to understand, let's have a look at a (
 const UppercaseProxy = (clientMessage) => {
 
     // requesting data from server
-    let fetchPromise = fetch('/web-service-url/', { data: clientMessage });
+    const fetchPromise = fetch('/web-service-url/', { data: clientMessage });
 
     // converting server response to upper case
-    fetchPromise = fetchPromise.then(serverData => serverData.data.toUpperCase());
+    const finalPromise = fetchPromise
+        .then(response => response.text())
+        .then(text => text.toUpperCase());
 
     // returning promise so that client code can attach `then` and `catch` handler
-    return(fetchPromise);
+    return(finalPromise);
 };
 
 export default UppercaseProxy;
