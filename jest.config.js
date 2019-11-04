@@ -1,5 +1,5 @@
 module.exports = {
-    "name": "mock-axios",
+    "name": "mock-fetch",
     "verbose": true,
     "testRegex": "/test/.*\\.spec\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
