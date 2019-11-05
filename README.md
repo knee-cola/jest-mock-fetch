@@ -132,7 +132,8 @@ In addition to mock `fetch` itslef being a spy, it also has additional public me
 
 ## fetch.mockResponse(response[, requestInfo])
 After a request has been made to the server (web service), this method resolves that request by simulating a server response. Status meaning is ignored, i.e. `400` will still resolve `fetch` promise. Use `mockError` for non-2xx responses.
-**NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly.
+
+**NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
 
 ### Arguments: `response`
 The first argument of this method is the a **response object** returned by the server, with a structure illustrated by the snippet below. All the properties are optional, meaning that if a property is ommitted it will be replaced by a default value (defaults are shown in the snippet).
@@ -164,7 +165,8 @@ You can change this behavior by passing `true` as third argument, activating the
 
 ## fetch.mockError(err[, requestInfo])
 This method simulates an error while making a server request (network error, server error, etc ...). 
-**NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly.
+
+**NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
 
 ### Arguments: `err`
 Error object will get passed to `catch` event handler function. If omitted it defaults to an empty object.
