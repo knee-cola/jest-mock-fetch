@@ -1,6 +1,6 @@
 {
   "name": "jest-mock-fetch",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Synchronous `fetch` mock for Jest",
   "main": "dist/index.js",
   "types": "dist/lib/index.d.ts",
