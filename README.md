@@ -6,11 +6,11 @@ Because it works synchronously, meaning that your tests will be easier to write,
 
 # What's in this document?
 * [Installation](#installation)
-  * [Setup](#setup)
-  * [Setup for polyfill/ponyfill libraries](#setup-for-polyfill/ponyfill-libraries)
+  * [Regular setup](#regular-setup)
+  * [Setup for polyfill/ponyfill libraries](#setup-for-polyfillponyfill-libraries)
 * [Basic example](#basic-example)
 * [fetch mock API](#fetch-mock-api)
-  * [fetch.mockResponse](#fetchmockresponseresponse-requestinfo-silentmode)
+  * [fetch.mockResponse](#fetchmockresponseresponse-requestinfo)
   * [fetch.mockError](#fetchmockerrorerr-requestinfo)
   * [fetch.lastReqGet](#fetchlastreqget)
   * [fetch.lastPromiseGet](#fetchlastpromiseget)
@@ -25,7 +25,7 @@ Installation is simple - just run:
 
     npm i --save-dev jest-mock-fetch
 
-## Setup
+## Regular setup
 Create a `setupJest.js` file to setup the mock with the folloging content:
 ```javascript
 // setupJest.js
@@ -58,7 +58,7 @@ Here's an example for [unfetch](https://www.npmjs.com/package/unfetch):
     ```
 
 # Basic example
-Let's consider that we want to test a component which uses Unfetch. This component returns a promise, which will be resolved after Unfetch is done communicating with the server.
+Let's consider that we want to test a component which uses `fetch`. This component returns a promise, which will be resolved after `fetch` is done communicating with the server.
 
 Here's a Jest snippet, which explains how we would test this component:
 ```javascript
