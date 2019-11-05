@@ -2,20 +2,18 @@
 This is a light-weight, easy to use synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
 
 ## Why should I use it?
-Because it will make your tests easier to write, read and understand.
-
-Here's why ...
+Because it works _synchronously_, which will make your tests easier to write, read and understand. Let's take a second to understand why that is ...
 
 ### Problem with _other_ mocks
 Most other `fetch` mocks work _async_, which makes writing tests a bit more difficult due to the following:
 * responses need to be mocked _beforehand_ (before a call to `fetch` is made)
 * assertations needs to be wrapped in a `then` handler function
 
-Since order of execution differ from the order in which statements in a test are written, reading and understandind such tests is a bit more difficult.
+Since order of execution differs from the order in which statements in a test are written, reading and understandind such tests is a bit more difficult.
 
 ### How this mock helps
 This mock works _synchronously_, meaning that:
-* you mock the response _after_ the `fetch` call is made (by the component beeing tested)
+* you mock the response _after_ the `fetch` call is made (i.e. by the component beeing tested)
 * assertations don't need to be wrapped inside a `then` handler function
 
 Order of execution exactly matches the order in which statements in you test are written, which makes reading them trivial. Take a look at [basic example](#basic-example) bellow.
