@@ -1,5 +1,5 @@
 import JestMockPromise from 'jest-mock-promise';
-import fetch from "../lib/index";
+import fetch from "../lib/mock-fetch";
 
 const URL = 'mock URL';
 

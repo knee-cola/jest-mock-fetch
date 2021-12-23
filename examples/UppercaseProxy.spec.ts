@@ -1,4 +1,4 @@
-import mockFetch from "../lib/index";
+import mockFetch from "../lib/mock-fetch";
 import UppercaseProxy from "./UppercaseProxy";
 
 afterEach(() => {
