@@ -44,6 +44,6 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "jest-mock-promise": "^1.1.2"
+    "jest-mock-promise": "^1.1.12"
   }
 }
