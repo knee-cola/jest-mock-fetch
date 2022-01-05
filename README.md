@@ -71,6 +71,7 @@ Here's a Jest snippet, which explains how we would test this component:
 ```javascript
 // ./test/UppercaseProxy.spec.js
 import UppercaseProxy from '../src/UppercaseProxy';
+import fetch from 'jest-mock-fetch';
 
 afterEach(() => {
     // cleaning up the mess left behind the previous test
@@ -93,7 +94,7 @@ it('UppercaseProxy should get data from the server and convert it to UPPERCASE',
     // a) the correct method was used (post)
     // b) went to the correct web service URL ('/web-service-url/')
     // c) if the payload was correct ('client is saying hello!')
-    expect(mockFetch).toHaveBeenCalledWith("/web-service-url/", {
+    expect(fetch).toHaveBeenCalledWith("/web-service-url/", {
         body: clientMessage,
     });
 
