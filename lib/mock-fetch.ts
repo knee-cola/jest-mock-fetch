@@ -5,20 +5,22 @@
  * @license  @license MIT License, http://www.opensource.org/licenses/MIT
  */
 
-import MockPromise from "jest-mock-promise";
+import JestMockPromise from "jest-mock-promise";
+const { PassThrough } = require('stream');
 
 import {
     FetchMockQueueItem,
     FetchMockType,
     HttpResponse,
+    HttpResponsePartial,
 } from "./mock-fetch-types";
 
 /** a FIFO queue of pending request */
 const _pending_requests: FetchMockQueueItem[] = [];
 
-const _newReq: (url: string, data?: any, config?: any) => MockPromise = (url: string, data?: any, config?: any) => {
+const _newReq: (url: string, data?: any, config?: any) => JestMockPromise = (url: string, data?: any, config?: any) => {
 
-    const promise: MockPromise = new MockPromise();
+    const promise: JestMockPromise = new JestMockPromise();
 
     _pending_requests.push({
         config,
@@ -33,99 +35,120 @@ const _newReq: (url: string, data?: any, config?: any) => MockPromise = (url: st
 /** `fetch` is called like a function, that's why we're defining it as a spy */
 const MockFetch: FetchMockType = (jest.fn(_newReq) as unknown) as FetchMockType;
 
-MockFetch.popPromise = (promise?: MockPromise) => {
-    if (promise) {
-        // remove the promise from pending queue
-        for (let ix = 0; ix < _pending_requests.length; ix++) {
-            const req: FetchMockQueueItem = _pending_requests[ix];
+/**
+ * (LEGACY) Removes the give promise from the queue OR last promise if none was suppiled
+ * @param promise
+ */
+MockFetch.popPromise = (promise?: JestMockPromise):JestMockPromise | undefined => {
+    console.warn("MockFetch.popPromise is a legacy method - please use `MockFetch.popQueueItem` instead");
+    const queueItem = MockFetch.popQueueItem(promise);
+    return(queueItem?.promise);
+}
 
-            if (req.promise === promise) {
-                _pending_requests.splice(ix, 1);
-                return req.promise;
-            }
-        }
-    } else {
-        // take the oldest promise
-        const req: FetchMockQueueItem = _pending_requests.shift();
-        return req ? req.promise : void 0;
-    }
+/**
+ * (LEGACY) Removes the give request from the queue OR last item if none was suppiled
+ * @param item
+ */
+MockFetch.popRequest = (item?: FetchMockQueueItem):FetchMockQueueItem | undefined => {
+    console.warn("MockFetch.popRequest is a legacy method - please use `MockFetch.popQueueItem` instead");
+    const queueItem = MockFetch.popQueueItem(item);
+    return(queueItem);
 };
 
-MockFetch.popRequest = (request?: FetchMockQueueItem) => {
-    if (request) {
-        const ix = _pending_requests.indexOf(request);
+/**
+ * Removes an item form the queue
+ * @param requestOrPromise (optional) which queue item to remove (can be specified by given promise)
+ */
+ MockFetch.popQueueItem = (requestOrPromise?: FetchMockQueueItem | JestMockPromise): FetchMockQueueItem | undefined => {
+    if (requestOrPromise) {
+
+        let ix = _pending_requests.indexOf(requestOrPromise as FetchMockQueueItem);
+
+        // IF request is not found
+        // > try searching for element by promise
         if (ix === -1) {
-            return void 0;
+            ix = _pending_requests.findIndex(({promise}) => promise === requestOrPromise as JestMockPromise);
         }
 
-        _pending_requests.splice(ix, 1);
-        return request;
+        if(ix === -1) {
+            return;                
+        }
+
+        return(_pending_requests.splice(ix, 1)[0]);
+
     } else {
+
+        // return the last element
         return _pending_requests.shift();
     }
 };
 
 /**
- * Removes an item form the queue, based on it's type
- * @param queueItem
+ * Simulate a server response, (optionally) with the given data
+ * @param responseObject (optional) response returned by the server
+ * @param queueItem (optional) request promise for which response should be resolved
+ * @param silentMode (optional) specifies whether the call should throw an error or
+ *   only fail quietly if no matching request is found.
  */
-const popQueueItem = (queueItem: MockPromise | FetchMockQueueItem = null) => {
-    // first let's pretend the param is a queue item
-    const request: FetchMockQueueItem = MockFetch.popRequest(
-        queueItem as FetchMockQueueItem,
-    );
-
-    if (request) {
-        // IF the request was found
-        // > set the promise
-        return request.promise;
-    } else {
-        // ELSE maybe the `queueItem` is a promise (legacy mode)
-        return MockFetch.popPromise(queueItem as MockPromise);
-    }
-};
-
-MockFetch.mockResponse = (
-    response?: HttpResponse,
-    queueItem: MockPromise | FetchMockQueueItem = null,
+    MockFetch.mockResponse = (
+    responseObject?: HttpResponsePartial,
+    item?: FetchMockQueueItem | JestMockPromise,
     silentMode: boolean = false,
-): void => {
-    // replacing missing data with default values
-    response = Object.assign(
-        {
-            config: {},
-            data: {},
-            headers: {},
-            status: 200,
-            statusText: "OK",
-        },
-        response,
-    );
+): HttpResponse | undefined => {
 
-    const promise = popQueueItem(queueItem);
+    const request = MockFetch.popQueueItem(item);
 
-    if (!promise && !silentMode) {
+    if (!request && !silentMode) {
         throw new Error("No request to respond to!");
-    } else if (!promise) {
+    } else if (!request) {
         return;
     }
 
-    // resolving the Promise with the given response data
-    promise.resolve(response);
+    const { promise, url } = request as FetchMockQueueItem;
+
+    const responseDefaults:HttpResponse = {
+        body: new PassThrough(),
+        headers: new Headers(),
+        status: 200,
+        statusText: "OK",
+        ok: true,
+        url,
+        arrayBuffer: () => new ArrayBuffer(0),
+        blob: () => new Blob(),
+        clone: jest.fn(),
+        error: jest.fn(),
+        formData: () => new FormData(),
+        json: () => ({ }),
+        redirect: jest.fn(),
+        text: () => "dummy text"
+    };
+
+    const actualResponse:HttpResponse = {
+        ...responseDefaults,
+        // all params can be overriden via the `responseObject` param
+        ...responseObject
+    }
+
+    promise.resolve(actualResponse);
+
+    return(actualResponse);
 };
 
 MockFetch.mockError = (
     error: any = {},
-    queueItem: MockPromise | FetchMockQueueItem = null,
+    item?: FetchMockQueueItem | JestMockPromise,
     silentMode: boolean = false,
 ) => {
-    const promise = popQueueItem(queueItem);
 
-    if (!promise && !silentMode) {
+    const request = MockFetch.popQueueItem(item);
+
+    if (!request && !silentMode) {
         throw new Error("No request to respond to!");
-    } else if (!promise) {
+    } else if (!request) {
         return;
     }
+
+    const { promise } = request;
 
     // resolving the Promise with the given response data
     promise.reject(error);

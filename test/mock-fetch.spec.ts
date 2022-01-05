@@ -1,11 +1,12 @@
 import JestMockPromise from 'jest-mock-promise';
 import fetch from "../lib/mock-fetch";
+import { HttpResponse, HttpResponsePartial } from '../lib/mock-fetch-types';
 
 const URL = 'mock URL';
 
 describe("MockFetch", () => {
     afterEach(() => {
-        fetch.reset();
+       fetch.reset();
     });
 
     it(`should return a promise when called`, () => {
@@ -14,73 +15,50 @@ describe("MockFetch", () => {
     });
 
     describe("mockResponse", () => {
-        // mockResponse - Simulate a server response, (optionally) with the given data
         it("`mockResponse` should resolve the given promise with the provided response", () => {
             const thenFn = jest.fn();
-            fetch(URL).then(thenFn);
+            const promise = fetch(URL);
+                  promise.then(thenFn);
 
-            const responseData = { data: { text: "some data" } };
+            const responseObject = fetch.mockResponse({
+                status: 404,
+                statusText: "Not-Found",
+            }, promise) as HttpResponse;
 
-            const responseObj = {
-                config: {},
-                data: responseData.data,
-                headers: {},
-                status: 200,
-                statusText: "OK",
-            };
-
-            fetch.mockResponse(responseObj);
-
-            expect(thenFn).toHaveBeenCalledWith(responseObj);
+            expect(thenFn).toHaveBeenCalledWith(responseObject);
         });
 
-        it("`mockResponse` should remove the last promise from the queue", () => {
-            fetch(URL);
-            fetch.mockResponse();
-            expect(fetch.popPromise()).toBeUndefined();
-        });
-
-        it("`mockResponse` should resolve the provided promise", () => {
+        it("`mockResponse` should resolve the provided request", () => {
             const firstFn = jest.fn();
             const secondFn = jest.fn();
             const thirdFn = jest.fn();
 
             fetch(URL).then(firstFn);
-
-            const secondPromise = fetch(URL);
-
-            secondPromise.then(secondFn);
-
+            
+            fetch(URL).then(secondFn);
+            const secondRequest = fetch.lastReqGet();
+            
             fetch(URL).then(thirdFn);
 
-            const responseData = { data: { text: "some data" } };
-            const responseObj = {
-                config: {},
-                data: responseData.data,
-                headers: {},
-                status: 200,
-                statusText: "OK",
-            };
-
-            fetch.mockResponse(responseObj, secondPromise);
+            const expectedResponse = fetch.mockResponse({
+                status: 404,
+                statusText: "NotFound",
+            }, secondRequest) as HttpResponse;
 
             expect(firstFn).not.toHaveBeenCalled();
-            expect(secondFn).toHaveBeenCalledWith(responseObj);
+            expect(secondFn).toHaveBeenCalledWith(expectedResponse);
             expect(thirdFn).not.toHaveBeenCalled();
         });
 
-        it("`mockResponse` should resolve the last given promise if none was provided", () => {
-            const firstPromise = fetch(URL);
-            const secondPromise = fetch(URL);
-            const thirdPromise = fetch(URL);
+        it("`mockResponse` should resolve the last given item if none was provided", () => {
 
             const firstThen = jest.fn();
             const secondThen = jest.fn();
             const thirdThen = jest.fn();
 
-            firstPromise.then(firstThen);
-            secondPromise.then(secondThen);
-            thirdPromise.then(thirdThen);
+            fetch(URL).then(firstThen);
+            fetch(URL).then(secondThen);
+            fetch(URL).then(thirdThen);
 
             fetch.mockResponse();
 
@@ -103,7 +81,13 @@ describe("MockFetch", () => {
             expect(thirdThen.mock.calls.length).toBe(1);
         });
 
-        it("`mockResponse` should throw a specific error if no request can be resolved", () => {
+        it("`mockResponse` should remove the LAST request from the queue", () => {
+            fetch(URL);
+            fetch.mockResponse();
+            expect(fetch.popQueueItem()).toBeUndefined();
+        });
+
+        it("`mockResponse` should throw a specific error if there's no active request", () => {
             expect(() => fetch.mockResponse()).toThrowError(
                 "No request to respond to!",
             );
@@ -117,35 +101,71 @@ describe("MockFetch", () => {
 
         it("`mockResponse` should work when used with async / await", async () => {
             const thenFn = jest.fn();
-            const promise = fetch(URL).then(thenFn);
+            const promise = fetch(URL)
+                .then(thenFn);
 
-            const responseData = { data: { text: "some data" } };
-            fetch.mockResponse(responseData);
+            fetch.mockResponse();
 
             await promise;
             expect(thenFn).toHaveBeenCalled();
         });
+
+        it("mockResponse should support text() method", async () => {
+            const thenFn = jest.fn();
+            const responseText = "response text";
+
+            fetch(URL)
+                .then(({text}) => text())
+                .then(thenFn);
+
+            fetch.mockResponse({
+                text: () => responseText
+            });
+
+            expect(thenFn).toHaveBeenCalledWith(responseText);
+        });
+
+        it("mockResponse should support json() method", async () => {
+            const thenFn = jest.fn();
+            const responseObject = { a: "this is prop A"};
+
+            fetch(URL)
+                .then(({json}) => json())
+                .then(thenFn);
+
+            fetch.mockResponse({
+                json: () => (responseObject)
+            });
+
+            expect(thenFn).toHaveBeenCalledWith(responseObject);
+        });
     });
 
     describe("mockError", () => {
+
         // mockError - Simulate an error in server request
-        it("`mockError` should fail the given promise with the provided response", () => {
+        it("`mockError` should fail the given request with the provided response", () => {
             const thenFn = jest.fn();
             const catchFn = jest.fn();
-            const promise = fetch(URL);
-            promise.then(thenFn).catch(catchFn);
+
+            fetch(URL)
+                .then(thenFn)
+                .catch(catchFn);
+            
+            let lastReq = fetch.lastReqGet()
 
             const errorObj = { n: "this is an error" };
 
-            fetch.mockError(errorObj, promise);
+            fetch.mockError(errorObj, lastReq);
+
+            expect(thenFn).not.toHaveBeenCalled();
             expect(catchFn).toHaveBeenCalledWith(errorObj);
-            expect(thenFn).not.toHaveBeenCalledWith(errorObj);
         });
 
-        it("`mockError` should remove the promise from the queue", () => {
+        it("`mockError` should remove the item from the queue", () => {
             fetch(URL);
             fetch.mockError();
-            expect(fetch.popPromise()).toBeUndefined();
+            expect(fetch.popQueueItem()).toBeUndefined();
         });
 
         it("`mockError` fail the provided promise", () => {
@@ -154,8 +174,10 @@ describe("MockFetch", () => {
             const thirdFn = jest.fn();
 
             fetch(URL).catch(firstFn);
+
             const secondPromise = fetch(URL);
-            secondPromise.catch(secondFn);
+                  secondPromise.catch(secondFn);
+
             fetch(URL).catch(thirdFn);
 
             fetch.mockError({}, secondPromise);
@@ -165,18 +187,14 @@ describe("MockFetch", () => {
             expect(thirdFn).not.toHaveBeenCalled();
         });
 
-        it("`mockError` should fail the last given promise if none was provided", () => {
-            const firstPromise = fetch(URL);
-            const secondPromise = fetch(URL);
-            const thirdPromise = fetch(URL);
-
+        it("`mockError` should fail the last given request if none was provided", () => {
             const firstFn = jest.fn();
             const secondFn = jest.fn();
             const thirdFn = jest.fn();
 
-            firstPromise.catch(firstFn);
-            secondPromise.catch(secondFn);
-            thirdPromise.catch(thirdFn);
+            fetch(URL).catch(firstFn);
+            fetch(URL).catch(secondFn);
+            fetch(URL).catch(thirdFn);
 
             fetch.mockError({});
 
@@ -199,23 +217,23 @@ describe("MockFetch", () => {
             expect(thirdFn.mock.calls.length).toBe(1);
         });
 
-        it("`mockError` should throw a specific error if no request can be resolved", () => {
+        it("`mockError` should throw a specific error no request if found to be rejected", () => {
             expect(() => fetch.mockError()).toThrowError(
                 "No request to respond to!",
             );
         });
 
-        it("`mockError` should not throw a specific error if no request can be resolved but silentMode is true", () => {
+        it("`mockError` should NOT throw a specific error if no request can be resolved but silentMode is true", () => {
             expect(() =>
                 fetch.mockError(undefined, undefined, true),
             ).not.toThrow();
         });
 
         it("`mockError` should pass down the error object", () => {
-            class CustomError extends Error {}
-            const promise = fetch(URL);
+            class CustomError extends Error {};
             const catchFn = jest.fn();
-            promise.catch(catchFn);
+
+            fetch(URL).catch(catchFn);
 
             fetch.mockError(new CustomError("custom error"));
 
@@ -224,15 +242,15 @@ describe("MockFetch", () => {
         });
     });
 
-    // lastReqGet - returns the most recent request
-    it("`lastReqGet` should return the most recent request", () => {
+    it("`lastReqGet` should return the most recent promise", () => {
+        
         fetch(URL);
         const lastPromise = fetch(URL);
 
         expect(fetch.lastReqGet().promise).toBe(lastPromise);
     });
 
-    it("`lastReqGet` should contain config as passed to  `fetch`", () => {
+    it("`lastReqGet` should contain config as passed to `fetch`", () => {
         const data = { data: "data" };
         const config = { config: "config" };
         const promise = fetch(URL, data, config);
@@ -248,7 +266,6 @@ describe("MockFetch", () => {
         });
     });
 
-    // lastPromiseGet - Returns promise of the most recent request
     it("`lastPromiseGet` should return the most recent promise", () => {
         fetch(URL);
         const lastPromise = fetch(URL);
@@ -257,10 +274,10 @@ describe("MockFetch", () => {
     });
 
     it("`getReqByUrl should return the most recent request matching the url", () => {
-        fetch(URL);
-        const lastPromise = fetch(URL);
+        fetch("URL A");
+        const lastPromise = fetch("URL B");
 
-        expect(fetch.getReqByUrl(URL).promise).toBe(lastPromise);
+        expect(fetch.getReqByUrl("URL B")?.promise).toBe(lastPromise);
     });
 
     it("`getReqByUrl should return `undefined` if no matching request can be found", () => {
@@ -268,8 +285,7 @@ describe("MockFetch", () => {
         expect(fetch.getReqByUrl('non-existing URL')).toBeUndefined();
     });
 
-    // popPromise - Removes the give promise from the queue
-    it("`popPromise` should remove the given promise from the queue", () => {
+    it("(LEGACY) `popPromise` should remove the given promise from the queue", () => {
         const firstPromise = fetch(URL);
         const secondPromise = fetch(URL);
         const thirdPromise = fetch(URL);
@@ -277,13 +293,12 @@ describe("MockFetch", () => {
         expect(fetch.popPromise(firstPromise)).toBe(firstPromise);
         expect(fetch.popPromise(thirdPromise)).toBe(thirdPromise);
         expect(fetch.popPromise(secondPromise)).toBe(secondPromise);
-
+        
         // queue should be empty
         expect(fetch.lastPromiseGet()).toBeUndefined();
     });
 
-    // popPromise - Removes the give promise from the queue
-    it("`popRequest` should remove the given request from the queue", () => {
+    it("(LEGACY) `popRequest` should remove the given request from the queue if request item is provided", () => {
         fetch(URL);
         const firstReq = fetch.lastReqGet();
         fetch(URL);
@@ -299,12 +314,26 @@ describe("MockFetch", () => {
         expect(fetch.lastReqGet()).toBeUndefined();
     });
 
-    // reset - Clears all of the queued requests
+    it("`popQueueItem` should remove the given request from the queue", () => {
+        fetch(URL);
+        const firstReq = fetch.lastReqGet();
+        fetch(URL);
+        const secondReq = fetch.lastReqGet();
+        fetch(URL);
+        const thirdReq = fetch.lastReqGet();
+
+        expect(fetch.popQueueItem(firstReq)).toBe(firstReq);
+        expect(fetch.popQueueItem(thirdReq)).toBe(thirdReq);
+        expect(fetch.popQueueItem(secondReq)).toBe(secondReq);
+
+        // queue should be empty
+        expect(fetch.lastReqGet()).toBeUndefined();
+    });
+
     it("`reset` should clear all the queued requests", () => {
         fetch(URL);
         fetch(URL);
 
-        fetch.reset();
         fetch.reset();
 
         expect(fetch.lastReqGet()).toBeUndefined();
