@@ -13,7 +13,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel lib --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
     "deploy2npm": "npm run build && npm publish",
-    "test": "jest --watch"
+    "test": "jest --watch --"
   },
   "repository": {
     "type": "git",

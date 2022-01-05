@@ -9,10 +9,13 @@
         "sourceMap": true,
         "declaration": true,
         "outDir": "./dist/",
-        "isolatedModules": false
+        "isolatedModules": false,
+        "strict": true,
+        "esModuleInterop": true, // solves the problem regarding the default importa vs importa *
     },
     "exclude": [
         "node_modules",
+        "examples",
         "dist"
     ],
     "include": [
