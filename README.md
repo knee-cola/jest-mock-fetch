@@ -102,8 +102,7 @@ it('UppercaseProxy should get data from the server and convert it to UPPERCASE',
     expect(fetch).toHaveBeenCalledWith('/web-service-url/', {data: clientMessage });
 
     // simulating a server response
-    let responseObj = { text: () => 'server says hello!' };
-    fetch.mockResponse(responseObj);
+    fetch.mockResponse({ text: () => 'server says hello!' });
 
     // checking the `then` spy has been called and if the
     // response from the server was converted to upper case
@@ -144,7 +143,7 @@ In addition to mock `fetch` itself being a spy, it also has additional public me
 * `lastPromiseGet` - returns promise created when the most recent request was made
 * `reset` - resets the `fetch` mock object - prepare it for the next test (typically used in `afterEach`)
 
-## fetch.mockResponse(response[, requestInfo])
+## fetch.mockResponse(response[, item])
 After a request has been made to the server (web service), this method resolves that request by simulating a server response. Status meaning is ignored, i.e. `400` will still resolve `fetch` promise. Use `mockError` for non-2xx responses.
 
 **NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
@@ -162,22 +161,22 @@ response = {
 ```
 The given response object will get passed to `then` even handler function.
 
-### Arguments: (optional) `requestInfo`
+### Arguments: (optional) `item`
 The second argument enables us to pinpoint an exact server request we wish to resolve. This can be useful if we're making multiple server requests and are planing to resolve them in a different order from the one in which they were made.
 
-We supply two different objects:
+We can supply two different objects:
 * an extended request info object, which can be accessed by calling `lastReqGet` method
-* a `promise` object, which can be accessed by calling the `lastPromiseGet` method
+* a `promise` object, which is can be accessed by calling the `lastPromiseGet` method
 
 If ommited this argument defaults to the latest request made (internally the `lastReqGet` method is called).
 
 At the end of this document you can find [an example](#resolving-requests-out-of-order) which demonstrates how this parameter can be used.
 
 ### Arguments: (optional) `silentMode`
-Both `mockResponse` and `mockError` will throw an error if you're trying to respond to no request, as this usually means you're doing something wrong.
+Both `mockResponse` and `mockError` will throw an error if there's no pending request to resolve/reject.
 You can change this behavior by passing `true` as third argument, activating the so-called `silentMode`. With `silentMode` activated, the methods will just do nothing.
 
-## fetch.mockError(err[, requestInfo])
+## fetch.mockError(err[, item])
 This method simulates an error while making a server request (network error, server error, etc ...). 
 
 **NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
@@ -185,8 +184,8 @@ This method simulates an error while making a server request (network error, ser
 ### Arguments: `err`
 Error object will get passed to `catch` event handler function. If omitted it defaults to an empty object.
 
-### Arguments: (optional) `requestInfo`
-The second argument is a `requestInfo` object, which works the same way as described part about the `mockResponse` method.
+### Arguments: (optional) `item`
+The second argument is a `item` object, which works the same way as described part about the `mockResponse` method.
 
 ### Arguments: (optional) `silentMode`
 The third argument is the `silentMode` flag, which works the same way as described part about the `mockResponse` method.
@@ -309,7 +308,7 @@ it('when resolving a request an appropriate handler should be called', () => {
     // -> we're using request info object to pinpoint the request
     // ... IF the info object is ommited, the method would automatically
     // resolve to the newest request from the internal queue (the SECOND one)
-    fetch.mockResponse({ data: 'server says hello!' }, firstRequestInfo);
+    const firstResponse = fetch.mockResponse({ text: () => 'server says hello!' }, firstRequestInfo);
 
     // only the first handler should have been called
     expect(thenFn1).toHaveBeenCalled();
