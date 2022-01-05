@@ -1,9 +1,9 @@
-import mockFetch from "../lib/mock-fetch";
+import fetch from "../lib/mock-fetch";
 import UppercaseProxy from "./UppercaseProxy";
 
 afterEach(() => {
     // cleaning up the mess left behind the previous test
-    mockFetch.reset();
+    fetch.reset();
 });
 
 it("UppercaseProxy should get data from the server and convert it to UPPERCASE", () => {
@@ -21,12 +21,12 @@ it("UppercaseProxy should get data from the server and convert it to UPPERCASE",
     // a) the correct method was used (post)
     // b) went to the correct web service URL ('/web-service-url/')
     // c) if the payload was correct ('client is saying hello!')
-    expect(mockFetch).toHaveBeenCalledWith("/web-service-url/", {
+    expect(fetch).toHaveBeenCalledWith("/web-service-url/", {
         body: clientMessage,
     });
 
     // simulating a server response
-    mockFetch.mockResponse({
+    fetch.mockResponse({
         text: () => 'server says hello!'
     });
 
