@@ -1,9 +1,9 @@
 {
   "name": "jest-mock-fetch",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Synchronous `fetch` mock for Jest",
   "main": "dist/mock-fetch.js",
-  "types": "dist/lib/mock-fetch.d.ts",
+  "types": "dist/mock-fetch.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
     "lint": "tslint -c tslint.json 'lib/**/*.ts'",
