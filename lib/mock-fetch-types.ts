@@ -120,9 +120,8 @@ export interface FetchMockAPI {
 
 export interface FetchMockQueueItem {
     promise: JestMockPromise;
-    url: string;
-    data?: any;
-    config?: any;
+    resource: RequestInfo;
+    init?: RequestInit;
 }
 
 /**

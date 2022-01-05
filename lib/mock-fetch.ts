@@ -18,15 +18,14 @@ import {
 /** a FIFO queue of pending request */
 const _pending_requests: FetchMockQueueItem[] = [];
 
-const _newReq: (url: string, data?: any, config?: any) => JestMockPromise = (url: string, data?: any, config?: any) => {
+const _newReq: (resource: RequestInfo, init?:RequestInit) => JestMockPromise = (resource, init) => {
 
     const promise: JestMockPromise = new JestMockPromise();
 
     _pending_requests.push({
-        config,
-        data,
+        init,
         promise,
-        url,
+        resource,
     });
 
     return promise;
@@ -104,7 +103,7 @@ MockFetch.popRequest = (item?: FetchMockQueueItem):FetchMockQueueItem | undefine
         return;
     }
 
-    const { promise, url } = request as FetchMockQueueItem;
+    const { promise, resource } = request as FetchMockQueueItem;
 
     const responseDefaults:HttpResponse = {
         body: new PassThrough(),
@@ -112,7 +111,7 @@ MockFetch.popRequest = (item?: FetchMockQueueItem):FetchMockQueueItem | undefine
         status: 200,
         statusText: "OK",
         ok: true,
-        url,
+        url: resource as string,
         arrayBuffer: () => new ArrayBuffer(0),
         blob: () => new Blob(),
         clone: jest.fn(),
@@ -163,11 +162,11 @@ MockFetch.lastPromiseGet = () => {
     return req ? req.promise : void 0;
 };
 
-MockFetch.getReqByUrl = (url: string) => {
+MockFetch.getReqByUrl = (resource: RequestInfo) => {
     return _pending_requests
         .slice()
         .reverse() // reverse cloned array to return most recent req
-        .find((x: FetchMockQueueItem) => x.url === url);
+        .find((x: FetchMockQueueItem) => x.resource === resource);
 };
 
 MockFetch.reset = () => {

@@ -250,19 +250,15 @@ describe("MockFetch", () => {
         expect(fetch.lastReqGet().promise).toBe(lastPromise);
     });
 
-    it("`lastReqGet` should contain config as passed to `fetch`", () => {
-        const data = { data: "data" };
-        const config = { config: "config" };
-        const promise = fetch(URL, data, config);
+    it("`lastReqGet` should contain `init` as passed to `fetch`", () => {
+        const init:RequestInit = { body: "data", method: "POST" };
+        const promise = fetch(URL, init);
         const lastReq = fetch.lastReqGet();
 
         expect(lastReq).toEqual({
-            config: {
-                ...config
-            },
-            data,
+            init,
             promise,
-            url: URL,
+            resource: URL,
         });
     });
 
