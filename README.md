@@ -1,6 +1,8 @@
 # What's this?
 This is a ultra light-weight synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
 
+It can be used to mock the native `fetch` or 3rd party libraries such as [`unfetch`](https://www.npmjs.com/package/unfetch).
+
 * [Installation](#installation)
   * [Regular setup](#regular-setup)
   * [Setup for polyfill/ponyfill libraries](#setup-for-polyfillponyfill-libraries)
@@ -30,7 +32,7 @@ Installation is simple - just run:
 
     npm i --save-dev jest-mock-fetch
 
-## Regular setup
+## Setup for native `fetch`
 Create a `setupJest.js` file to setup the mock with the folloging content:
 ```javascript
 // setupJest.js
@@ -47,7 +49,7 @@ Edit the `jest.config.js` file and add the following:
 }
 ```
 
-## Setup for polyfill/ponyfill libraries
+## Setup 3rd party libraries
 If you are using a polyfill/ponyfill library (i.e. [unfetch](https://www.npmjs.com/package/unfetch)) which implement `fetch` API then you need to use a different setup procedure.
 
 Here's an example for [unfetch](https://www.npmjs.com/package/unfetch):
@@ -87,13 +89,18 @@ it('UppercaseProxy should get data from the server and convert it to UPPERCASE',
         .then(thenFn)
         .catch(catchFn);
 
-    // since `fetch` is a spy, we can check if the server request was correct
-    // a) request went to the correct web service URL ('/web-service-url/')
-    // b) if the payload was correct ('client is saying hello!')
-    expect(fetch).toHaveBeenCalledWith('/web-service-url/', {data: clientMessage });
+    // since `post` method is a spy, we can check if the server request was correct
+    // a) the correct method was used (post)
+    // b) went to the correct web service URL ('/web-service-url/')
+    // c) if the payload was correct ('client is saying hello!')
+    expect(mockFetch).toHaveBeenCalledWith("/web-service-url/", {
+        body: clientMessage,
+    });
 
     // simulating a server response
-    fetch.mockResponse({ text: () => 'server says hello!' });
+    fetch.mockResponse({
+        text: () => 'server says hello!'
+    });
 
     // checking the `then` spy has been called and if the
     // response from the server was converted to upper case
