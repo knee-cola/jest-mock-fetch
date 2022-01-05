@@ -145,13 +145,23 @@ After a request has been made to the server (web service), this method resolves 
 
 ### Arguments: `response`
 The first argument of this method is the a **response object** returned by the server, with a structure illustrated by the snippet below. All the properties are optional, meaning that if a property is ommitted it will be replaced by a default value (defaults are shown in the snippet).
+
 ```javascript
 response = {
-    data: {},
+    body: new PassThrough(),
+    headers: new Headers(),
     status: 200,
-    statusText: 'OK',
-    headers: {},
-    config: {},
+    statusText: "OK",
+    ok: true,
+    url: resource as string,
+    arrayBuffer: () => new ArrayBuffer(0),
+    blob: () => new Blob(),
+    clone: jest.fn(),
+    error: jest.fn(),
+    formData: () => new FormData(),
+    json: () => ({ }),
+    redirect: jest.fn(),
+    text: () => "dummy text"
 }
 ```
 The given response object will get passed to `then` even handler function.
