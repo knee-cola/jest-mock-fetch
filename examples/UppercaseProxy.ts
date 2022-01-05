@@ -1,15 +1,12 @@
 const UppercaseProxy = (clientMessage) => {
-
-    // requesting data from server
-    const fetchPromise = fetch('/web-service-url/', { data: clientMessage });
-
-    // converting server response to upper case
-    const finalPromise = fetchPromise
-        .then(response => response.text())
-        .then(text => text.toUpperCase());
-
-    // returning promise so that client code can attach `then` and `catch` handler
-    return(finalPromise);
+    return(
+        // requesting data from server
+        fetch('/web-service-url/', { body: clientMessage })
+            // get the response text
+            .then(response => response.text())
+            // convert text to uppercase
+            .then(text => text.toUpperCase())
+    );
 };
 
 export default UppercaseProxy;

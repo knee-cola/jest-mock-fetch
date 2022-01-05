@@ -1,24 +1,6 @@
 # What's this?
-This is a light-weight, easy to use synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
+This is a ultra light-weight synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
 
-## Why should I use it?
-Because it works _synchronously_, which will make your tests easier to write, read and understand. Let's take a second to understand why that is ...
-
-### Problem with _other_ mocks
-Most other `fetch` mocks work _async_, which makes writing tests a bit more difficult due to the following:
-* responses need to be mocked _beforehand_ (before a call to `fetch` is made)
-* assertations needs to be wrapped in a `then` handler function
-
-Since order of execution differs from the order in which statements in a test are written, reading and understandind such tests is a bit more difficult.
-
-### How this mock helps
-This mock works _synchronously_, meaning that:
-* you mock the response _after_ the `fetch` call is made (i.e. by the component beeing tested)
-* assertations don't need to be wrapped inside a `then` handler function
-
-Order of execution exactly matches the order in which statements in you test are written, which makes reading them trivial. Take a look at [basic example](#basic-example) bellow.
-
-# What's in this document?
 * [Installation](#installation)
   * [Regular setup](#regular-setup)
   * [Setup for polyfill/ponyfill libraries](#setup-for-polyfillponyfill-libraries)
@@ -33,6 +15,15 @@ Order of execution exactly matches the order in which statements in you test are
   * [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
   * [Resolving requests out of order](#resolving-requests-out-of-order)
 * [Synchronous promise](#synchronous-promise)
+
+# Braking Changes in v2.0.0 !!!
+Module verion 2.0.0 was intended to make this mock more in-line with the official [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+
+This however brings some braking changes:
+* `fetch` function now has only two arguments (`resource` and `init`) instead of three (`url`, `data`, `config`)
+* `mockResult` no longer accepts `data` param - you now need to provide implementation to some of the usuall response methods (i.e. `text`, `json`, etc)
+
+Please update your code accordingly.
 
 # Installation
 Installation is simple - just run:
@@ -102,8 +93,7 @@ it('UppercaseProxy should get data from the server and convert it to UPPERCASE',
     expect(fetch).toHaveBeenCalledWith('/web-service-url/', {data: clientMessage });
 
     // simulating a server response
-    let responseObj = { text: () => 'server says hello!' };
-    fetch.mockResponse(responseObj);
+    fetch.mockResponse({ text: () => 'server says hello!' });
 
     // checking the `then` spy has been called and if the
     // response from the server was converted to upper case
@@ -118,17 +108,14 @@ To make this example complete and easier to understand, let's have a look at a (
 ```javascript
 // ./src/UppercaseProxy.js
 const UppercaseProxy = (clientMessage) => {
-
-    // requesting data from server
-    const fetchPromise = fetch('/web-service-url/', { data: clientMessage });
-
-    // converting server response to upper case
-    const finalPromise = fetchPromise
-        .then(response => response.text())
-        .then(text => text.toUpperCase());
-
-    // returning promise so that client code can attach `then` and `catch` handler
-    return(finalPromise);
+    return(
+        // requesting data from server
+        fetch('/web-service-url/', { body: clientMessage })
+            // get the response text
+            .then(response => response.text())
+            // convert text to uppercase
+            .then(text => text.toUpperCase())
+    );
 };
 
 export default UppercaseProxy;
@@ -144,7 +131,7 @@ In addition to mock `fetch` itself being a spy, it also has additional public me
 * `lastPromiseGet` - returns promise created when the most recent request was made
 * `reset` - resets the `fetch` mock object - prepare it for the next test (typically used in `afterEach`)
 
-## fetch.mockResponse(response[, requestInfo])
+## fetch.mockResponse(response[, item])
 After a request has been made to the server (web service), this method resolves that request by simulating a server response. Status meaning is ignored, i.e. `400` will still resolve `fetch` promise. Use `mockError` for non-2xx responses.
 
 **NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
@@ -162,22 +149,22 @@ response = {
 ```
 The given response object will get passed to `then` even handler function.
 
-### Arguments: (optional) `requestInfo`
+### Arguments: (optional) `item`
 The second argument enables us to pinpoint an exact server request we wish to resolve. This can be useful if we're making multiple server requests and are planing to resolve them in a different order from the one in which they were made.
 
-We supply two different objects:
+We can supply two different objects:
 * an extended request info object, which can be accessed by calling `lastReqGet` method
-* a `promise` object, which can be accessed by calling the `lastPromiseGet` method
+* a `promise` object, which is can be accessed by calling the `lastPromiseGet` method
 
 If ommited this argument defaults to the latest request made (internally the `lastReqGet` method is called).
 
 At the end of this document you can find [an example](#resolving-requests-out-of-order) which demonstrates how this parameter can be used.
 
 ### Arguments: (optional) `silentMode`
-Both `mockResponse` and `mockError` will throw an error if you're trying to respond to no request, as this usually means you're doing something wrong.
+Both `mockResponse` and `mockError` will throw an error if there's no pending request to resolve/reject.
 You can change this behavior by passing `true` as third argument, activating the so-called `silentMode`. With `silentMode` activated, the methods will just do nothing.
 
-## fetch.mockError(err[, requestInfo])
+## fetch.mockError(err[, item])
 This method simulates an error while making a server request (network error, server error, etc ...). 
 
 **NOTE:** This method should be called _after_ the fetch call in your test for the promise to resolve properly. After all remember that this mock works **synchronously**.
@@ -185,8 +172,8 @@ This method simulates an error while making a server request (network error, ser
 ### Arguments: `err`
 Error object will get passed to `catch` event handler function. If omitted it defaults to an empty object.
 
-### Arguments: (optional) `requestInfo`
-The second argument is a `requestInfo` object, which works the same way as described part about the `mockResponse` method.
+### Arguments: (optional) `item`
+The second argument is a `item` object, which works the same way as described part about the `mockResponse` method.
 
 ### Arguments: (optional) `silentMode`
 The third argument is the `silentMode` flag, which works the same way as described part about the `mockResponse` method.
@@ -309,7 +296,7 @@ it('when resolving a request an appropriate handler should be called', () => {
     // -> we're using request info object to pinpoint the request
     // ... IF the info object is ommited, the method would automatically
     // resolve to the newest request from the internal queue (the SECOND one)
-    fetch.mockResponse({ data: 'server says hello!' }, firstRequestInfo);
+    const firstResponse = fetch.mockResponse({ text: () => 'server says hello!' }, firstRequestInfo);
 
     // only the first handler should have been called
     expect(thenFn1).toHaveBeenCalled();

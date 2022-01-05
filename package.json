@@ -1,9 +1,9 @@
 {
   "name": "jest-mock-fetch",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Synchronous `fetch` mock for Jest",
-  "main": "dist/index.js",
-  "types": "dist/lib/index.d.ts",
+  "main": "dist/mock-fetch.js",
+  "types": "dist/lib/mock-fetch.d.ts",
   "scripts": {
     "clean": "rimraf ./dist",
     "lint": "tslint -c tslint.json 'lib/**/*.ts'",
@@ -13,7 +13,7 @@
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel lib --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
     "deploy2npm": "npm run build && npm publish",
-    "test": "jest --watch"
+    "test": "jest --watch --"
   },
   "repository": {
     "type": "git",
@@ -44,6 +44,6 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "jest-mock-promise": "^1.1.2"
+    "jest-mock-promise": "^2.0.2"
   }
 }

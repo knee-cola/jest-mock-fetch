@@ -1,4 +1,4 @@
-import mockFetch from "../lib/index";
+import mockFetch from "../lib/mock-fetch";
 import UppercaseProxy from "./UppercaseProxy";
 
 afterEach(() => {
@@ -22,17 +22,18 @@ it("UppercaseProxy should get data from the server and convert it to UPPERCASE",
     // b) went to the correct web service URL ('/web-service-url/')
     // c) if the payload was correct ('client is saying hello!')
     expect(mockFetch).toHaveBeenCalledWith("/web-service-url/", {
-        data: clientMessage,
+        body: clientMessage,
     });
 
     // simulating a server response
-    const responseObj = { text: () => 'server says hello!' };
-    mockFetch.mockResponse(responseObj);
-
-    // catch should not have been called
-    expect(catchFn).not.toHaveBeenCalled();
+    mockFetch.mockResponse({
+        text: () => 'server says hello!'
+    });
 
     // checking the `then` spy has been called and if the
     // response from the server was converted to upper case
     expect(thenFn).toHaveBeenCalledWith("SERVER SAYS HELLO!");
+
+    // catch should not have been called
+    expect(catchFn).not.toHaveBeenCalled();
 });
