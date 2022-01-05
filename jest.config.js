@@ -1,4 +1,5 @@
 module.exports = {
+    "testEnvironment": 'jsdom',
     "name": "mock-fetch",
     "verbose": true,
     "testRegex": "/test/.*\\.spec\\.(ts|tsx|js)$",
@@ -8,6 +9,6 @@ module.exports = {
         "js"
     ],
     "transform": {
-        "\\.(ts|tsx)$": "ts-jest"
+        "\\.tsx?$": "ts-jest"
     }
 };
