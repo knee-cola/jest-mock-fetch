@@ -1,24 +1,6 @@
 # What's this?
-This is a light-weight, easy to use synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
+This is a ultra light-weight synchronous `fetch` mock for unit testing with [Jest](https://facebook.github.io/jest/).
 
-## Why should I use it?
-Because it works _synchronously_, which will make your tests easier to write, read and understand. Let's take a second to understand why that is ...
-
-### Problem with _other_ mocks
-Most other `fetch` mocks work _async_, which makes writing tests a bit more difficult due to the following:
-* responses need to be mocked _beforehand_ (before a call to `fetch` is made)
-* assertations needs to be wrapped in a `then` handler function
-
-Since order of execution differs from the order in which statements in a test are written, reading and understandind such tests is a bit more difficult.
-
-### How this mock helps
-This mock works _synchronously_, meaning that:
-* you mock the response _after_ the `fetch` call is made (i.e. by the component beeing tested)
-* assertations don't need to be wrapped inside a `then` handler function
-
-Order of execution exactly matches the order in which statements in you test are written, which makes reading them trivial. Take a look at [basic example](#basic-example) bellow.
-
-# What's in this document?
 * [Installation](#installation)
   * [Regular setup](#regular-setup)
   * [Setup for polyfill/ponyfill libraries](#setup-for-polyfillponyfill-libraries)
@@ -33,6 +15,15 @@ Order of execution exactly matches the order in which statements in you test are
   * [Values returned by `lastReqGet` and `lastPromiseGet` methods](#values-returned-by-lastreqget-and-lastpromiseget-methods)
   * [Resolving requests out of order](#resolving-requests-out-of-order)
 * [Synchronous promise](#synchronous-promise)
+
+# Braking Changes in v2.0.0 !!!
+Module verion 2.0.0 was intended to make this mock more in-line with the official [fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API).
+
+This however brings some braking changes:
+* `fetch` function now has only two arguments (`resource` and `init`) instead of three (`url`, `data`, `config`)
+* `mockResult` no longer accepts `data` param - you now need to provide implementation to some of the usuall response methods (i.e. `text`, `json`, etc)
+
+Please update your code accordingly.
 
 # Installation
 Installation is simple - just run:
