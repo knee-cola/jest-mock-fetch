@@ -32,7 +32,7 @@ Installation is simple - just run:
 
     npm i --save-dev jest-mock-fetch
 
-## Setup for native `fetch`
+## Setup for mocking native `fetch`
 Create a `setupJest.js` file to setup the mock with the folloging content:
 ```javascript
 // setupJest.js
@@ -49,7 +49,7 @@ Edit the `jest.config.js` file and add the following:
 }
 ```
 
-## Setup 3rd party libraries
+## Setup for mocking 3rd party libraries
 If you are using a polyfill/ponyfill library (i.e. [unfetch](https://www.npmjs.com/package/unfetch)) which implement `fetch` API then you need to use a different setup procedure.
 
 Here's an example for [unfetch](https://www.npmjs.com/package/unfetch):
