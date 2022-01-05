@@ -195,13 +195,9 @@ let requestInfo = {
     // promise created while
     promise: SimplePromise,
     // URL passed to the fetch
-    url: "https://github.com/",
-    // data which was passed
-    data: { text: "this is payload sent to the server" },
-    // config which was passed
-    config: {
-        ... something ...
-    }
+    resource: "https://github.com/",
+    // payload sent to server
+    init: { body: "this is payload sent to the server" },
 }
 ```
 
